@@ -8,6 +8,7 @@ The following is a nice exercise: Write a detection rule for these two / transfo
 
 A fairly recent 0-day vulnerability, Follina-MSDT, has a publicly available sigma rule developed by huntress's Matthew Brennan:
 Follina-MSDT Sigma Rule
+!https://github.com/gowda1268/TryHackMe/blob/main/image/79fa09b3a6a8d9e94447fc02e8a63f4b.png?raw=true
 
            
 title: Suspicious msdt.exe execution - Office Exploit
