@@ -1,0 +1,102 @@
+You’re feeling proud of yourself for being able to implement detection rules that have an immediate impact on the organization when suddenly, news broke out of a new 0-day vulnerability. Upon taking a closer look at it, you realize that your organization is directly susceptible to this vulnerability.
+
+You don’t have to be able to experience everything in order to learn from something - you can learn from other people’s experiences or research or learnings. Analogous to that is the array of research being done by the community, and almost always, they release public IOCs. These public IOCs are then transformed into usable mechanisms to detect bad things in the environment.
+
+Going back to our previous task, we've leveraged Sigma to transform unique IOCs into a product-agnostic form that we can use regardless of our SIEM choice. As this technique shows great promise to the community, there are a number of nice repositories that contain user-submitted Sigma rules that anyone can use. You can plug one directly into your SIEM for immediate value, or further edit it to fit your environment and add even more value to your security posture.
+
+The following is a nice exercise: Write a detection rule for these two / transform these publicly generated IOCs into usable alerts for use in the Elastic Stack and Splunk. We will do the first one together, while you can do the rest on your own. For our purposes, we will be using Uncoder to help with the transformation of these sigma rules. Uncoder is a nice tool that helps convert sigma rules to queries that can be immediately used within a SIEM of your choice.
+
+A fairly recent 0-day vulnerability, Follina-MSDT, has a publicly available sigma rule developed by huntress's Matthew Brennan:
+Follina-MSDT Sigma Rule
+
+           
+title: Suspicious msdt.exe execution - Office Exploit
+id: 97a80ed7-1f3f-4d05-9ef4-65760e634f6b
+status: experimental
+description: This rule will monitor suspicious arguments passed to the msdt.exe process. These arguments are an indicator of recent Office/Msdt exploitation. 
+references:
+    - https://doublepulsar.com/follina-a-microsoft-office-code-execution-vulnerability-1a47fce5629e
+    - https://twitter.com/MalwareJake/status/1531019243411623939
+author: 'Matthew Brennan'
+tags:
+    - attack.execution
+logsource:
+    category: process_creation
+    product: windows
+detection:
+
+    selection1:
+      Image|endswith:
+        - 'msdt.exe'
+    selection2:
+      CommandLine|contains:
+        - 'PCWDiagnostic'
+    selection3:
+      CommandLine|contains:
+        - 'ms-msdt:-id'
+        - 'ms-msdt:/id'
+
+    selection4:
+      CommandLine|contains:
+        - 'invoke'
+    condition: selection1 and (selection4 or (selection2 and selection3))
+falsepositives:
+  - Unknown
+level: high
+
+        
+
+Another 0-day vulnerability that made waves this past year, log4j, has multiple publicly available sigma rules. One such rule can detect suspicious shells spawned from a Java host process, written by Andreas Hunkeler and Florian Roth:
+Log4j Suspicious Shells Sigma Rule
+
+           
+title: Suspicious Shells Spawned by Java
+id: 0d34ed8b-1c12-4ff2-828c-16fc860b766d
+description: Detects suspicious shell spawned from Java host process (e.g. log4j exploitation)
+status: experimental
+author: Andreas Hunkeler (@Karneades), Florian Roth
+date: 2021/12/17
+modified: 2022/08/02
+tags:
+    - attack.initial_access
+    - attack.persistence
+    - attack.privilege_escalation
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|endswith: '\java.exe'
+        Image|endswith:
+            - '\sh.exe'
+            - '\bash.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\schtasks.exe'
+            - '\certutil.exe'
+            - '\whoami.exe'
+            - '\bitsadmin.exe'
+            - '\wscript.exe'
+            - '\cscript.exe'
+            - '\scrcons.exe'
+            - '\regsvr32.exe'
+            - '\hh.exe'
+            - '\wmic.exe'        # https://app.any.run/tasks/c903e9c8-0350-440c-8688-3881b556b8e0/
+            - '\mshta.exe'
+            - '\rundll32.exe'
+            - '\forfiles.exe'
+            - '\scriptrunner.exe'
+            - '\mftrace.exe'
+            - '\AppVLP.exe'
+            - '\curl.exe'
+    condition: selection
+falsepositives:
+    - Legitimate calls to system binaries
+    - Company specific internal usage
+level: high
+
+        
+
+Upon navigating to Uncoder, you will immediately see two text boxes, as shown below:
+
+Uncoder Homepage
